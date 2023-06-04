@@ -15,11 +15,14 @@ fi
 
 # Remove the challenge TXT record from the zone
 if [ -n "${RECORD_ID}" ]; then
-	
-	RESULT=$(curl -s -X POST "https://pddimp.yandex.ru/api2/admin/dns/del" \
-     -H "PddToken: $API_KEY" \
-     -d "domain=$DOMAIN&record_id=$RECORD_ID" \
-	 | python -c "import sys,json;print(json.load(sys.stdin)['success'])")
-	
-	echo $RESULT 
+
+	# https://yandex.ru/dev/api360/doc/ref/DomainDNSService/DomainDNSService_Delete.html
+	RESULT=$(curl -s -X DELETE "https://api360.yandex.net/directory/v1/org/$ORG_ID/domains/$DOMAIN/dns/$RECORD_ID" \
+      -H "Authorization: OAuth $OAUTH_TOKEN")
+
+    if [[ "$RESULT" == "{}" ]]; then
+        echo "ok"
+    else
+        echo $RESULT
+    fi
 fi
