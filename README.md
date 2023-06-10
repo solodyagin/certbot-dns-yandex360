@@ -1,16 +1,16 @@
 # certbot-dns-pddyandex
-PDD Yandex DNS API for certbot --manual-auth-hook --manual-cleanup-hook
+Yandex API360 DNS for certbot --manual-auth-hook --manual-cleanup-hook
 
-Install and renew Let's encrypt wildcard ssl certificate for domain *.site.com using PDD Yandex DNS API:
+Install and renew Let's encrypt wildcard ssl certificate for domain *.site.com using Yandex API360:
 
-#### 1) Clone this repo and set the API key
+#### 1) Clone this repo and set the OAuth Token
 ```bash
 git clone https://github.com/actionm/certbot-dns-pddyandex/ && cd ./certbot-dns-pddyandex
 ```
 
-#### 2) Set API KEY
+#### 2) Set OAuth Token
 
-Get your PDD Yandex API key from https://tech.yandex.ru/pdd/doc/concepts/access-docpage/ )
+Get your Yandex API360 OAuth token from https://yandex.ru/dev/api360/doc/concepts/access.html )
 
 ```bash
 nano ./config.sh
