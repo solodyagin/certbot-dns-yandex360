@@ -1,32 +1,61 @@
-# certbot-dns-pddyandex
-Yandex API360 DNS for certbot --manual-auth-hook --manual-cleanup-hook
+# certbot-dns-yandex360
 
-Install and renew Let's encrypt wildcard ssl certificate for domain *.site.com using Yandex API360:
+Yandex 360 API for certbot `--manual-auth-hook` `--manual-cleanup-hook`
 
-#### 1) Clone this repo and set the OAuth Token
+Install and renew Let's encrypt wildcard SSL certificate for domain \*.site.com using Yandex 360 API:
+
+#### 1. Clone this repo and set the OAuth Token
+
 ```bash
-git clone https://github.com/actionm/certbot-dns-pddyandex/ && cd ./certbot-dns-pddyandex
+git clone https://github.com/solodyagin/certbot-dns-yandex360.git && cd ./certbot-dns-yandex360
 ```
 
-#### 2) Set OAuth Token
+#### 2. Set OAuth Token
 
-Get your Yandex API360 OAuth token from https://yandex.ru/dev/api360/doc/concepts/access.html )
+Get your Yandex 360 API OAuth token and Organization ID
+
+Documentation is here https://yandex.ru/dev/api360/doc/ru/
+
+How to get API key :
+
+> - Go https://oauth.yandex.ru/client/new/
+> - Set name
+> - Choose platform and set "Redirect URI" as https://oauth.yandex.ru/verification_code ![](./img/platform.png)
+> - Add permissions for change DNS ![](./img/permissions.png)
+> - Set your email
+> - Create Application
+> - Then go https://oauth.yandex.ru/authorize?response_type=token&client_id=$CLIENT_ID  
+>   where $CLIENT_ID is ClientID of your created app from https://oauth.yandex.ru/.  
+>   Now you have $OAUTH_TOKEN for authentificator.
+> - Get get your $ORG_ID from https://admin.yandex.ru/company-profile in bottom-left angle of page.
 
 ```bash
 nano ./config.sh
 ```
 
-#### 3) Install CertBot from git
+#### 3. Generate wildcard
+
 ```bash
-cd ../ && git clone https://github.com/certbot/certbot && cd certbot
+sudo certbot certonly \
+    --agree-tos \
+    --server https://acme-v02.api.letsencrypt.org/directory \
+    --preferred-challenges dns-01
+    --manual-auth-hook ../certbot-dns-yandex360/authenticator.sh \
+    --manual-cleanup-hook ../certbot-dns-yandex360/cleanup.sh \
+    --manual \
+    --email info@site.com \
+    -d *.site.com
 ```
 
-#### 4) Generate wildcard
-```bash
-./letsencrypt-auto certonly --manual-public-ip-logging-ok --agree-tos --email info@site.com --renew-by-default -d site.com -d *.site.com --manual --manual-auth-hook ../certbot-dns-pddyandex/authenticator.sh --manual-cleanup-hook ../certbot-dns-pddyandex/cleanup.sh --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
-```
+#### 4. Force Renew
 
-#### 5) Force Renew
 ```bash
-./letsencrypt-auto renew --force-renew --manual --manual-auth-hook ../certbot-dns-pddyandex/authenticator.sh --manual-cleanup-hook ../certbot-dns-pddyandex/cleanup.sh --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
+certbot renew \
+    --force-renew \
+    --agree-tos \
+    --server https://acme-v02.api.letsencrypt.org/directory \
+    --preferred-challenges dns-01 \
+    --manual \
+    --manual-auth-hook ../certbot-dns-yandex360/authenticator.sh \
+    --manual-cleanup-hook ../certbot-dns-yandex360/cleanup.sh
 ```
