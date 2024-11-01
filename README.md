@@ -1,61 +1,70 @@
 # certbot-dns-yandex360
 
-Yandex 360 API for certbot `--manual-auth-hook` `--manual-cleanup-hook`
+Скрипты для получения wildcard-сертификата от Let's Encrypt для домена, делегированного Яндекс 360 для бизнеса.
 
-Install and renew Let's encrypt wildcard SSL certificate for domain \*.site.com using Yandex 360 API:
-
-#### 1. Clone this repo and set the OAuth Token
+#### 1. Установите зависимости
 
 ```bash
-git clone https://github.com/solodyagin/certbot-dns-yandex360.git && cd ./certbot-dns-yandex360
+sudo apt install curl jq
 ```
 
-#### 2. Set OAuth Token
+#### 2. Склонируйте репозиторий
 
-Get your Yandex 360 API OAuth token and Organization ID
+```bash
+git clone https://github.com/solodyagin/certbot-dns-yandex360.git
+cd ./certbot-dns-yandex360
+```
 
-Documentation is here https://yandex.ru/dev/api360/doc/ru/
+#### 3. Укажите учётные данные
 
-How to get API key :
+##### Получите доступ к Яндекс 360 API (подробнее в [документации](https://yandex.ru/dev/api360/doc/ru/))
 
-> - Go https://oauth.yandex.ru/client/new/
-> - Set name
-> - Choose platform and set "Redirect URI" as https://oauth.yandex.ru/verification_code ![](./img/platform.png)
-> - Add permissions for change DNS ![](./img/permissions.png)
-> - Set your email
-> - Create Application
-> - Then go https://oauth.yandex.ru/authorize?response_type=token&client_id=$CLIENT_ID  
->   where $CLIENT_ID is ClientID of your created app from https://oauth.yandex.ru/.  
->   Now you have $OAUTH_TOKEN for authentificator.
-> - Get get your $ORG_ID from https://admin.yandex.ru/company-profile in bottom-left angle of page.
+> - Перейдите на страницу создания приложения https://oauth.yandex.ru/client/new/
+> - Введите произвольное название сервиса
+> - Выберите платформу и в поле "Redirect URI" укажите `https://oauth.yandex.ru/verification_code` <p>![](./img/platform.png)</p>
+> - Добавьте разрешение на управление DNS-записями <p>![](./img/permissions.png)</p>
+> - Укажите ваш email
+> - Создайте приложение
+> - Перейдите на страницу https://oauth.yandex.ru/authorize?response_type=token&client_id=$CLIENT_ID \
+>   где $CLIENT_ID - это идентификатор созданного приложения ClientID (https://oauth.yandex.ru)
+> - Теперь у вас есть $OAUTH_TOKEN для аутентификатора
+
+##### Получите идентификатор организации
+
+> - Перейдите на страницу https://admin.yandex.ru/company-profile
+> - Найдите ID в левом нижнем углу страницы <p>![](./img/organization.png)</p>
+> - Теперь у вас есть $ORG_ID
+
+##### Внесите полученные данные в `config.sh`
 
 ```bash
 nano ./config.sh
 ```
 
-#### 3. Generate wildcard
+#### 4. Сгенерировать wildcard-сертификат
+
+Вместо `example.com` укажите свой домен
 
 ```bash
 sudo certbot certonly \
-    --agree-tos \
-    --server https://acme-v02.api.letsencrypt.org/directory \
-    --preferred-challenges dns-01
-    --manual-auth-hook ../certbot-dns-yandex360/authenticator.sh \
-    --manual-cleanup-hook ../certbot-dns-yandex360/cleanup.sh \
-    --manual \
-    --email info@site.com \
-    -d *.site.com
+	-d "example.com" \
+	-d "*.example.com" \
+	--email info@example.com \
+	--agree-tos \
+	--preferred-challenges dns \
+	--manual \
+	--manual-auth-hook ../certbot-dns-yandex360/authenticator.sh \
+	--manual-cleanup-hook ../certbot-dns-yandex360/cleanup.sh
 ```
 
-#### 4. Force Renew
+#### 5. Выпустить новый сертификат
 
 ```bash
 certbot renew \
-    --force-renew \
-    --agree-tos \
-    --server https://acme-v02.api.letsencrypt.org/directory \
-    --preferred-challenges dns-01 \
-    --manual \
-    --manual-auth-hook ../certbot-dns-yandex360/authenticator.sh \
-    --manual-cleanup-hook ../certbot-dns-yandex360/cleanup.sh
+	--force-renew \
+	--agree-tos \
+	--preferred-challenges dns \
+	--manual \
+	--manual-auth-hook ../certbot-dns-yandex360/authenticator.sh \
+	--manual-cleanup-hook ../certbot-dns-yandex360/cleanup.sh
 ```
